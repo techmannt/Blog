@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { Link, RouteComponentProps } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 var moment = require('moment');
 
 class Home extends React.Component<IHomeProps, IHomeState> {
@@ -7,11 +8,10 @@ class Home extends React.Component<IHomeProps, IHomeState> {
     super(props);
     this.state = {
       loaded: false,
-      chirpInfo: [],
+      blogInfo: [],
       title: '',
       message: '',
       tag: '',
-      selectedUserId: '0',
       users: [],
       tags: [],
     };
@@ -21,12 +21,11 @@ class Home extends React.Component<IHomeProps, IHomeState> {
     let tagData = await fetch(`/api/tags`);
     let tagInfo = await tagData.json();
 
-    let res2 = await fetch('/api/users');
-    let chirpInfo = await res2.json();
-    console.log(chirpInfo);
+    let res = await fetch('/api/entries');
+    let blogInfo = await res.json();
     this.setState({
       loaded: true,
-      chirpInfo,
+      blogInfo,
       tags: tagInfo
     });
   }
@@ -38,9 +37,10 @@ class Home extends React.Component<IHomeProps, IHomeState> {
       tag: this.state.tag,
       title: this.state.title,
       message: this.state.message
+
     };
     try {
-      let chirpData = await fetch(`/api/chirps/`, {
+      let blogData = await fetch(`/api/entries/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -48,21 +48,21 @@ class Home extends React.Component<IHomeProps, IHomeState> {
         body: JSON.stringify(newBody)
 
       });
-      if (chirpData.ok) {
-        let chirpData = await fetch('/api/chirps');
-        let chirpInfo = await chirpData.json();
-        this.setState({ chirpInfo, title: '', message: '' });
+      if (blogData.ok) {
+        let blogData = await fetch('/api/entries');
+        let blogInfo = await blogData.json();
+        this.setState({ blogInfo, title: '', message: '' });
       }
     } catch (error) {
       console.log(error);
     }
   }
 
-  handleChirpTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  handleBlogTitleChange(e: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ title: e.target.value });
   }
 
-  handleChirpMessageChange(e: React.ChangeEvent<HTMLInputElement>) {
+  handleBlogMessageChange(e: React.ChangeEvent<HTMLTextAreaElement>) {
     this.setState({ message: e.target.value });
   }
 
@@ -71,7 +71,7 @@ class Home extends React.Component<IHomeProps, IHomeState> {
       return (
         <main className="container py-5">
           <div className="row">
-            {this.state.chirpInfo.map(entry => (
+            {this.state.blogInfo.map(entry => (
               <div className="col-md-4" key={entry.id}>
                 <div className="card">
                   <img src="https://i.ibb.co/rG6jhns/starwars.jpg" alt="theme"></img>
@@ -83,21 +83,22 @@ class Home extends React.Component<IHomeProps, IHomeState> {
                   </div>
                 </div>
               </div>
-
             ))}
 
             <form className="col-12 form-group p-3 shadow">
-              <input className="form-control shadow" type="text" name="title" value={this.state.title} onChange={(event) => this.handleChirpTitleChange(event)} placeholder="Enter title" />
-              <input className="form-control shadow" type="text" name="message" value={this.state.message} onChange={(event) => this.handleChirpMessageChange(event)} placeholder="Enter blog post" />
+              <input className="form-control shadow" type="text" name="title" value={this.state.title} onChange={(event) => this.handleBlogTitleChange(event)} placeholder="Enter title" />
+              <textarea rows={10} className="form-control shadow" name="message" value={this.state.message} onChange={(event: React.ChangeEvent<HTMLTextAreaElement>) => this.handleBlogMessageChange(event)} placeholder="Enter blog post" />
+
+              <ReactMarkdown source={this.state.message} />
 
               <label>Tag:</label>
               <select
-                value={this.state.selectedUserId}
+                value={this.state.tag}
                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) => this.setState({ tag: e.target.value })}
                 className="form-control">
                 <option value="0">Select...</option>
                 {this.state.tags.map(tag => (
-                  <option key={tag.id} value={tag.name}>{tag.name}</option>
+                  <option key={tag.id} value={tag.id}>{tag.name}</option>
                 ))}
               </select>
 
@@ -114,7 +115,7 @@ class Home extends React.Component<IHomeProps, IHomeState> {
 
 export interface IHomeProps extends RouteComponentProps<{ id: string }> { }
 
-interface chirpObject {
+interface blogObject {
   name: string;
   message: string;
   id: number;
@@ -138,11 +139,10 @@ interface ITags {
 
 export interface IHomeState {
   loaded: boolean;
-  chirpInfo: chirpObject[];
+  blogInfo: blogObject[];
   title: string;
   message: string;
   tag: string;
-  selectedUserId: string;
   users: IUsers[];
   tags: ITags[];
 }

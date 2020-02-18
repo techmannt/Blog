@@ -1,11 +1,9 @@
 import { Router } from 'express';
-import ChirpsRouter from './chirps';
-import usersRouter from './users';
+import blogRouter from './entries';
 import tagsRouter from './tags';
 
 const router = Router();
-router.use('/chirps', ChirpsRouter);
-router.use('/users', usersRouter);
+router.use('/entries', blogRouter);
 router.use('/tags', tagsRouter);
 
 export default router;

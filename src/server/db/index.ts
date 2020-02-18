@@ -1,7 +1,4 @@
 import * as mysql from 'mysql';
-import chirpCrud from './queries/chirpCrud';
-import users from './queries/users';
-import findTags from './queries/tags';
 import config from '../config';
 
 const connection = mysql.createConnection(config.mysql);
@@ -18,8 +15,10 @@ export const Query = <T=any>(query: string, values?: Array<any>) => {
   });
 }
 
+import blogCrud from './queries/blogCrud';
+import findTags from './queries/tags';
+
 export default {
-  chirpCrud,
-  users,
+  blogCrud,
   findTags
 }
